@@ -71,6 +71,9 @@ if __name__=='__main__':
     sym2hip = pandas.read_csv(
         os.path.join(settings.DATA_PATH, 'sym2hip.csv'), header=0)
     
+    # remove trailing space from ids
+    symbad['identifier'] = symbad.apply(
+                lambda x : x.get('identifier').strip(), axis=1)
     # create the space grid
     sg = SpaceGrid(hipparcos, symbad, intervals=50)
     
