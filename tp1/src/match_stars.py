@@ -74,6 +74,10 @@ if __name__=='__main__':
     # remove trailing space from ids
     symbad['identifier'] = symbad.apply(
                 lambda x : x.get('identifier').strip(), axis=1)
+
+    symbad['idHip'] = symbad.apply(
+        lambda x : x.get('identifier') if x.get('identifier') in list(sym2hip['HD']) else None, axis=1)
+
     # create the space grid
     sg = SpaceGrid(hipparcos, symbad, intervals=50)
     
