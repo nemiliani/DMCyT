@@ -44,12 +44,22 @@ class SpaceGrid(object):
         '''
         vecx = numpy.array([-1,0,1])
         vecy = numpy.array([-1,0,1])
-        exstar = star_rac
-        eystar = star_dec
+        exstar = int(star_rac)
+        eystar = int(star_dec)
         xstar_vec = pandas.DataFrame((exstar + vecx))[exstar + vecx > 0]
         ystar_vec = pandas.DataFrame((eystar + vecy))[eystar + vecy > 0]
-        star_vec = SpaceGrid.expand_grid({'rec': xstar_vec, 'dec': ystar_vec})
+        star_vec = SpaceGrid.expand_grid({'rec': list(xstar_vec.get(0)), 'dec': list(ystar_vec.get(0))})
         # extract a df with the stars in the query zone
+        neighbours = self.hipparcos[
+                (self.stars['rec'] == star_vec['rec'][0]) & 
+                (self.stars['dec'] == star_vec['dec'][0])]
+        for i in range(1, len(star_vec)):
+            neighbours = neighbours.append(
+                self.hipparcos[
+                (self.stars['rec'] == star_vec['rec'][i]) & 
+                (self.stars['dec'] == star_vec['dec'][i])])
+        return neighbours
+        
 
 if __name__=='__main__':
 
