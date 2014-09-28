@@ -117,6 +117,7 @@ if __name__=='__main__':
         symbad_dists.append(closest['mindist'])
         symbad_closest.loc[i] = closest['closest']
 
-    print symbad_dists
-    print symbad_closest
-
+    symbad_augmented = pandas.DataFrame(data=sg.symbad)
+    symbad_augmented['dist'] = symbad_dists
+    symbad_augmented['cercanaHip'] = symbad_closest['HIP']
+    symbad_augmented.to_csv('symbad_augmented.csv')
