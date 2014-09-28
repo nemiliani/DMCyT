@@ -53,22 +53,37 @@ obtener.vecinas <- function(consulta){
   # primero busca cuales son las celdas a consultar
   exstar <- consulta$rac
   eystar <- consulta$dec
+#  print(exstar)
+#  print(eystar)
   exstar.vec <- (exstar + vecx) [exstar + vecx > 0]
   eystar.vec <- (eystar + vecy) [eystar + vecy > 0]
+#  print(exstar.vec)
+#  print(eystar.vec)
   star.vec <- expand.grid(rec=exstar.vec, dec=eystar.vec)
+#  print(star.vec)
   # luego se extrae un dataframe con las estrellas que estan en la zona de consulta
+#  print(star.vec$rec[1])
+#  print(star.vec$dec[1])
   vecinas <- hip[ind.estrella$rec == star.vec$rec[1] & ind.estrella$dec == star.vec$dec[1],]
+#  print(vecinas)
   for(j in 2:nrow(star.vec)) {
-    vecinas <- rbind(vecinas, hip[ind.estrella$rec == star.vec$rec[j] & ind.estrella$dec == star.vec$dec[j],] )  
+    vecinas <- rbind(vecinas, hip[ind.estrella$rec == star.vec$rec[j] & ind.estrella$dec == star.vec$dec[j],] )
   }
+#  print(vecinas)
   return(vecinas)
   # retorna el dataframe
 }
 
 mas.cercana <- function(consulta, vecinas){
 # Esta funcion a partir de la conuslta Symbad y del listado de vecinas
-# busca la mas cercana  
+# busca la mas cercana
+#  print('mas.cercana')
+#  print(consulta)
+#  print(consulta[c(6,8)])
+#  print(vecinas[1,c(2,3)])
+#  print (consulta[c(6,8)] - vecinas[1,c(2,3)])
   mindist <- sqrt(sum((consulta[c(6,8)] - vecinas[1,c(2,3)])^2))
+#  print(mindist)
   masvecina <- vecinas[1,]
   for(i in 2:nrow(vecinas)){
     nvd = sqrt(sum((consulta[c(6,8)] - vecinas[i,c(2,3)])^2))
@@ -80,6 +95,7 @@ mas.cercana <- function(consulta, vecinas){
   # la funcion retorna la distancia y los datos de la estrella mas cercana
   # una mejora de esta funcion seria generar una alarma si dos estrellas estan igual de
   # cerca a la consulta
+#  print(mindist)
   return(list(mas.vecina=masvecina, dist.min=mindist))
 }
 
@@ -95,10 +111,10 @@ for(j in 1:nrow(symbad)){
   symbad.mas.vecina[j,] <- posibles.iguales$mas.vecina
 }
 
-# El vector de distancias
-symbad.dists
-# El dataframe de estrellas más cercanas en Hipparcos a las de Symbad.
-symbad.mas.vecina
+## El vector de distancias
+print(symbad.dists)
+## El dataframe de estrellas más cercanas en Hipparcos a las de Symbad.
+#print(symbad.mas.vecina)
 
 # Como se ven los datasets superpuestos
 plot(symbad$RA_J2000, symbad$DE_J2000, pch=20, col="blue")
@@ -106,7 +122,7 @@ points(symbad.mas.vecina$RA_J2000, symbad.mas.vecina$DE_J2000, pch=21, col="red"
 
 # Podemos agregar la informacion obtenida a un dataframe Symbad aumentado
 symbad.aumentado <- data.frame(symbad, dist=symbad.dists, cercanaHip=symbad.mas.vecina$HIP )
-
+ 
 # Finalmente agregamos al dataframe aumentado el ID Hipparcos de la identificacion cruzada
 symbad.aumentado$idcruzHip <- NA
 for(i in 1:nrow(symbad.aumentado)){
@@ -115,4 +131,5 @@ for(i in 1:nrow(symbad.aumentado)){
   }
 }
 symbad.aumentado$idcruzHip <- as.numeric(sub("HIP ", "", symbad.aumentado$idcruzHip))
-
+print(symbad.aumentado)
+write.csv(file="symbad_augmented.csv", x=symbad.aumentado)
