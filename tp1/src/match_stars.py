@@ -3,6 +3,7 @@ import pandas
 import numpy
 import os
 import itertools
+import math
 
 class SpaceGrid(object):
    
@@ -19,7 +20,7 @@ class SpaceGrid(object):
         self.ra_sp = self.ra_dif/(self.intervals-1)
         self.de_sp = self.de_dif/(self.intervals-1)
         
-        # set the position at the space grid for hiparcos and symbad catalog
+        # set the position at the space grid for hipparcos catalog
         self.stars = pandas.DataFrame(
                    numpy.zeros((len(self.hipparcos),2)), columns=['rec','dec'])
         self.stars['rec'] = numpy.floor(
@@ -27,6 +28,7 @@ class SpaceGrid(object):
         self.stars['dec'] = numpy.floor(
             (self.hipparcos['DE_J2000'] - self.de_min) / self.de_sp) + 1
         
+        # set the position at the space grid for symbad catalog
         self.symbad['rac'] = numpy.floor(
             (self.symbad['RA_J2000'] - self.ra_min) / self.ra_sp) + 1
         self.symbad['dec'] = numpy.floor(
@@ -46,9 +48,17 @@ class SpaceGrid(object):
         vecy = numpy.array([-1,0,1])
         exstar = int(star_rac)
         eystar = int(star_dec)
+#        print 'x axis slots'
+#        print exstar
+#        print 'y axis slots'
+#        print eystar
         xstar_vec = pandas.DataFrame((exstar + vecx))[exstar + vecx > 0]
         ystar_vec = pandas.DataFrame((eystar + vecy))[eystar + vecy > 0]
+#        print list(xstar_vec.get(0))
+#        print list(ystar_vec.get(0))
         star_vec = SpaceGrid.expand_grid({'rec': list(xstar_vec.get(0)), 'dec': list(ystar_vec.get(0))})
+#        print 'grid x,y combination :'        
+#        print star_vec        
         # extract a df with the stars in the query zone
         neighbours = self.hipparcos[
                 (self.stars['rec'] == star_vec['rec'][0]) & 
@@ -59,6 +69,24 @@ class SpaceGrid(object):
                 (self.stars['rec'] == star_vec['rec'][i]) & 
                 (self.stars['dec'] == star_vec['dec'][i])])
         return neighbours
+
+    def get_closest(self, star_rac, star_dec, neighbours):
+        mindist = math.sqrt(
+                        numpy.sum(
+                            numpy.power(numpy.array([star_rac, star_dec]) - 
+                                numpy.array([neighbours.iloc[0]['RA_J2000'], neighbours.iloc[0]['DE_J2000']]), 2)
+                        ))
+        closest = neighbours.iloc[0]
+        for i in range(1, len(neighbours)):
+            nvd = math.sqrt(
+                        numpy.sum(
+                            numpy.power(numpy.array([star_rac, star_dec]) - 
+                                numpy.array([neighbours.iloc[i]['RA_J2000'], neighbours.iloc[i]['DE_J2000']]), 2)
+                        ))
+            if nvd < mindist :
+                mindist = nvd
+                closest = neighbours.iloc[i]        
+        return { 'closest' : closest, 'mindist' : mindist}
         
 
 if __name__=='__main__':
@@ -80,7 +108,15 @@ if __name__=='__main__':
 
     # create the space grid
     sg = SpaceGrid(hipparcos, symbad, intervals=50)
-    
+    symbad_dists = []
+    symbad_closest = pandas.DataFrame(columns=['HIP', 'RA_J2000', 'DE_J2000', 'Plx', 
+                                                    'pmRA', 'pmDE', 'Vmag', 'B_V'])
     for i in range(0, len(symbad)):
-        sg.get_neighbours(symbad['rac'][i], symbad['dec'][i])
+        neighbours = sg.get_neighbours(symbad['rac'][i], symbad['dec'][i])
+        closest = sg.get_closest(symbad['RA_J2000'][i], symbad['DE_J2000'][i], neighbours)
+        symbad_dists.append(closest['mindist'])
+        symbad_closest.loc[i] = closest['closest']
+
+    print symbad_dists
+    print symbad_closest
 
