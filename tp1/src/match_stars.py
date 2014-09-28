@@ -4,6 +4,8 @@ import numpy
 import os
 import itertools
 import math
+import matplotlib.pyplot as plt
+import pickle
 
 class SpaceGrid(object):
    
@@ -121,3 +123,9 @@ if __name__=='__main__':
     symbad_augmented['dist'] = symbad_dists
     symbad_augmented['cercanaHip'] = symbad_closest['HIP']
     symbad_augmented.to_csv('symbad_augmented.csv')
+
+    plt.figure()
+    plt.hist(symbad_dists, normed=1, histtype='bar', rwidth=0.8)
+    plt.savefig('distance_dstribution.png')
+
+    pickle.dump(symbad_dists, open('dist.pickle','wb'))
