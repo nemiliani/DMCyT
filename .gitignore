@@ -1,3 +1,9 @@
 *.pyc
 venv/
 venv2/
+cache/
+.RData
+.Rhistory
+.~lock.*
+*.pickle
+
