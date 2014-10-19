@@ -11,14 +11,15 @@ if __name__ == '__main__':
             description='Hierarchic clustering app')
     parser.add_argument('-f', '--data_file', type=str, help='data file')
     parser.add_argument('-d', '--dendrogram_file', type=str, help='dendrogram png file name')
+    parser.add_argument('-m', '--method', type=str, default='average',
+            choices=['single', 'complete', 'weighted', 'average'], help='dendrogram png file name')
     parser.add_argument('-c', '--columns', nargs='+', type=str)
     args = parser.parse_args()
 
     df = pandas.read_csv(args.data_file, header=0)
-    #['RA_J2000','DE_J2000','dist']
     data = df.as_matrix(columns=args.columns)
     distance_matrix = sdm.pdist(data)
-    y = sch.linkage(distance_matrix, method='average')
+    y = sch.linkage(distance_matrix, method=args.method)
 
     pylab.figure()
     sch.dendrogram(y)
