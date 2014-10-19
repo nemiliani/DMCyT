@@ -89,7 +89,7 @@ class SpaceGrid(object):
                 mindist = nvd
                 closest = neighbours.iloc[i]        
         return { 'closest' : closest, 'mindist' : mindist}
-        
+
 
 if __name__=='__main__':
 
@@ -122,10 +122,9 @@ if __name__=='__main__':
     symbad_augmented = pandas.DataFrame(data=sg.symbad)
     symbad_augmented['dist'] = symbad_dists
     symbad_augmented['cercanaHip'] = symbad_closest['HIP']
-    symbad_augmented.to_csv('symbad_augmented.csv')
+    sym_no_dups = symbad_augmented.sort(columns='dist', axis=0).drop_duplicates(subset='cercanaHip')
+    sym_no_dups.to_csv('symbad_augmented.csv')
 
     plt.figure()
-    plt.hist(symbad_dists, normed=0, histtype='bar', rwidth=0.8)
+    plt.hist(list(sym_no_dups['dist']), normed=0, histtype='bar', rwidth=0.8)
     plt.savefig('distance_dstribution.png')
-
-    pickle.dump(symbad_dists, open('dist.pickle','wb'))
