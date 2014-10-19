@@ -6,4 +6,4 @@ cache/
 .Rhistory
 .~lock.*
 *.pickle
-
+graphs.bak/
