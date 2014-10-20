@@ -24,3 +24,4 @@ if __name__ == '__main__':
     pylab.figure()
     sch.dendrogram(y)
     pylab.savefig(args.dendrogram_file)
+    pylab.close()
