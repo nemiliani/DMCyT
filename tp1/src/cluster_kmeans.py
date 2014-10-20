@@ -13,10 +13,10 @@ from time import time
 def bench_k_means(estimator, name, data):
     t0 = time()
     estimator.fit(data)
-    print 'Name        : %s'  % name 
-    print 'Time        : %.2fs' % (time() - t0)
-    print 'Inhertia    : %i' % estimator.inertia_
-    print 'silhouette  : %.3f' % \
+    print 'Name             : %s'  % name 
+    print 'Time             : %.2fs' % (time() - t0)
+    print 'Inhertia         : %i' % estimator.inertia_
+    print 'total silhouette : %.3f' % \
             metrics.silhouette_score(data, estimator.labels_,
                                       metric='euclidean',
                                       sample_size=len(data))
@@ -25,7 +25,10 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Hierarchic clustering app')
     parser.add_argument('-f', '--data_file', type=str, help='data file')
-    parser.add_argument('-p', '--plot_file', type=str, help='output png file name')
+    parser.add_argument('-p', '--scatter_file', type=str, 
+                                help='output png file name for cluster scatter')
+    parser.add_argument('-s', '--silhouette_file', type=str, default='sil.png',
+                                help='output png file name for silhouette hists')
     parser.add_argument('-k', '--n_clusters', type=int, help='number of clusters')
     parser.add_argument('-j', '--n_jobs', type=int, help='number of jobs for parallelization')
     parser.add_argument('-r', '--random_state', type=int, 
@@ -33,7 +36,7 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--init', type=str, choices=['k-means++', 'random'], 
                           default='random', help='initialization method')
     parser.add_argument('-c', '--columns', nargs='+', type=str)
-    parser.add_argument('-e', '--predict', type=str, defaut=None, help='predict subset')
+    parser.add_argument('-o', '--output_file', type=str, default='out.csv')
     args = parser.parse_args()
 
     df = pandas.read_csv(args.data_file, header=0)
@@ -44,10 +47,40 @@ if __name__ == '__main__':
                random_state=args.random_state)
     bench_k_means(km, 'kmeans', data)
 
-    if args.predict:
-        df = pandas.read_csv(args.predict, header=0)
-        predict_data = df.as_matrix(columns=args.columns)
-        y = df.predict(predict_data)
+    # which cluster has more hyades stars ?
+    y = km.predict(data)
+    # add to the data frame a cluster column
+    df['cluster'] = y
+    # add to the data frame a silhouette column
+    df['silhouette'] = metrics.silhouette_samples(
+                        data, 
+                        km.labels_,
+                        metric='euclidean')
+    sdf = df.sort(['cluster','is_hyades'], ascending=[1, 1])
+    sdf.to_csv(args.output_file)
+    # lets print hyades amount
+    print ''
+    print '------------------------------------'
+    for i in range(args.n_clusters):
+        tdf = sdf[sdf.loc[:, 'cluster'] == i]
+        hyades_count = len(tdf[tdf.loc[:,'is_hyades'] == 1])
+        # get silohutte per cluster
+        print 'cluster : %d' % i
+        print 'total samples   : %d'   % len(tdf)
+        print 'total hyades    : %d'   % hyades_count
+        print 'hyades density  : %.2f' % (float(hyades_count) / len(tdf))
+        print 'silh. mean      : %.5f' % tdf['silhouette'].mean()
+        print 'silh. max       : %.5f' % tdf['silhouette'].max()
+        print 'silh. min       : %.5f' % tdf['silhouette'].min()
+        print 'silh. median    : %.5f' % tdf['silhouette'].median()
+        print '------------------------------------'
+
+        plt.subplot(args.n_clusters, 1, i)
+        plt.hist(list(tdf['silhouette']), normed=0,
+                    histtype='bar', rwidth=0.5, orientation='horizontal')
+        plt.ylabel('sil. clus. %d' % i)
+    plt.savefig(args.silhouette_file, dpi=1000)
+
     #visualize it
     reduced_data = PCA(n_components=2).fit_transform(data)
     kmeans = skc.KMeans(n_clusters=args.n_clusters, 
@@ -88,4 +121,4 @@ if __name__ == '__main__':
     plt.ylim(y_min, y_max)
     plt.xticks(())
     plt.yticks(())
-    plt.savefig(args.plot_file)
+    plt.savefig(args.scatter_file)
