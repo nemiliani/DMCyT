@@ -39,6 +39,7 @@ if __name__ == '__main__':
                           default='random', help='initialization method')
     parser.add_argument('-c', '--columns', nargs='+', type=str)
     parser.add_argument('-o', '--output_file', type=str, default='out.csv')
+    parser.add_argument('-m', '--cluster_metrics_file', type=str, default='cluster_metrics.csv')
     args = parser.parse_args()
 
     df = pandas.read_csv(args.data_file, header=0)
@@ -63,25 +64,23 @@ if __name__ == '__main__':
     # lets print hyades amount
     print ''
     print '------------------------------------'
-    for i in range(args.n_clusters):
-        tdf = sdf[sdf.loc[:, 'cluster'] == i]
-        hyades_count = len(tdf[tdf.loc[:,'is_hyades'] == 1])
-        # get silohutte per cluster
-        print 'cluster : %d' % i
-        print 'total samples   : %d'   % len(tdf)
-        print 'total hyades    : %d'   % hyades_count
-        print 'hyades density  : %.2f' % (float(hyades_count) / len(tdf))
-        print 'silh. mean      : %.5f' % tdf['silhouette'].mean()
-        print 'silh. max       : %.5f' % tdf['silhouette'].max()
-        print 'silh. min       : %.5f' % tdf['silhouette'].min()
-        print 'silh. median    : %.5f' % tdf['silhouette'].median()
-        print '------------------------------------'
-
-        plt.subplot(args.n_clusters, 1, i)
-        plt.hist(list(tdf['silhouette']), normed=0,
-                    histtype='bar', rwidth=0.5, orientation='horizontal')
-        plt.ylabel('sil. clus. %d' % i)
-    plt.savefig(args.silhouette_file, dpi=1000)
+    with open(args.cluster_metrics_file, 'w') as f:
+        f.write('cluster,total samples,total hyades,hyades density,silh. mean,silh. max,' \
+                'silh. min, silh. median\n')
+        for i in range(args.n_clusters):
+            tdf = sdf[sdf.loc[:, 'cluster'] == i]
+            hyades_count = len(tdf[tdf.loc[:,'is_hyades'] == 1])
+            # get silohutte per cluster
+            line = '%d,%d,%d,%.2f,%.5f,%.5f,%.5f,%.5f\n' % (
+                    i, len(tdf), hyades_count, (float(hyades_count) / len(tdf)), 
+                    tdf['silhouette'].mean(), tdf['silhouette'].max(), 
+                    tdf['silhouette'].min(), tdf['silhouette'].median())
+            f.write(line)
+            plt.subplot(args.n_clusters, 1, i)
+            plt.hist(list(tdf['silhouette']), normed=0,
+                        histtype='bar', rwidth=0.5, orientation='horizontal')
+            plt.ylabel('sil. clus. %d' % i)
+        plt.savefig(args.silhouette_file, dpi=1000)
 
     #visualize it
     reduced_data = PCA(n_components=2).fit_transform(data)
