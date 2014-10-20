@@ -29,6 +29,8 @@ if __name__ == '__main__':
                                 help='output png file name for cluster scatter')
     parser.add_argument('-s', '--silhouette_file', type=str, default='sil.png',
                                 help='output png file name for silhouette hists')
+    parser.add_argument('-v', '--sil_vs_cluster', type=str, default=None,
+                                help='output png file name for silhouette vs cluster')
     parser.add_argument('-k', '--n_clusters', type=int, help='number of clusters')
     parser.add_argument('-j', '--n_jobs', type=int, help='number of jobs for parallelization')
     parser.add_argument('-r', '--random_state', type=int, 
@@ -122,3 +124,22 @@ if __name__ == '__main__':
     plt.xticks(())
     plt.yticks(())
     plt.savefig(args.scatter_file)
+
+    if args.sil_vs_cluster :
+        plt.figure(2)
+        s = []
+        k = range(2,20)
+        for i in k:
+            print '.', 
+            kmeans_model = skc.KMeans(n_clusters=i, 
+                   init=args.init,
+                   n_jobs=args.n_jobs,
+                   random_state=args.random_state).fit(data)
+            s.append(metrics.silhouette_score(
+                    data,  kmeans_model.labels_, metric='euclidean'))
+        print ''
+        plt.plot(k, s)
+        plt.ylabel("Total Sihlouette score")
+        plt.xlabel("Number of clusters clusters")
+        plt.savefig(args.sil_vs_cluster)
+        
