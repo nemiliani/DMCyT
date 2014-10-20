@@ -142,4 +142,5 @@ if __name__ == '__main__':
         plt.ylabel("Total Sihlouette score")
         plt.xlabel("Number of clusters clusters")
         plt.savefig(args.sil_vs_cluster)
+    plt.close()        
         
