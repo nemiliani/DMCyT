@@ -1,0 +1,87 @@
+Pasos para aproximar el K inicial
+---------------------------------
+
+Se hicieron clusters jerarquicos para los sets de tycho e hipparcos
+y se generaron los graficos :
+
++ hipparcos_dendro_ra-de.png
++ tycho_dendro_ra-de.png
+
+De ahi se ve que para ambos sets valores de k interesantes son 4,5 y 6.
+El proximo paso fue graficar el valor de silhouette vs numero de clusters
+generando los graficos :
+
++ hipparcos.kmeans_sil_vs_cluster.png : kmeans sobre hipparcos variando clusters
++ hipparcos.pam._sil_vs_cluster.png : PAM sobre hipparcos variando clusters
++ tycho.kmeans._sil_vs_cluster.png : kmeans sobre tycho variando clusters
++ tycho.pam._sil_vs_cluster.png : PAM sobre tycho variando clusters
+
+De estos grafico se desprende que para Kmeans entre 4 y 6 clusters se obtienen
+mejores valores de silhouette. Usando PAM parece ser que la pendiente negativa
+de los valores de silhouette es mas importante entre 4 y 6. Esto grafico muestran
+el score silhoutte total. Posteriormente se prueban estos valores tratando de
+obtener el mayor silohuette para el cluster que mas Hyades contiene. Es preferible
+tener un menor valor de silhouette general y un mayor valor silhouette para el
+cluster que mas Hyades contiene.
+
+Probando Kmeans sobre Hipparcos y Tycho
+---------------------------------------
+
+KMeans sobre hipparcos con k = 4, 5 y 6
+
+python cluster_kmeans.py -f ../data/hipparcos.tag.csv -p ../data/graphs/hipparcos.kmeans_scatter_k<i>.png -k <i> -j 6 -r 85562 -i random -c RA_J2000 DE_J2000 Plx pmRA pmDE Vmag B-V -o run/hipparcos.kmeans_k<i>.csv -s ../data/graphs/hipparcos.kmeans_silhouette_k<i>.png -m ../data/hipparcos.kmeans_metrics_k<i>.csv
+
+En base a :
+
++ hipparcos.kmeans_metrics_k4.csv
++ hipparcos.kmeans_scatter_k4.png
++ hipparcos.kmeans_silhouette_k4.png
+ 
++ hipparcos.kmeans_metrics_k5.csv
++ hipparcos.kmeans_scatter_k5.png
++ hipparcos.kmeans_silhouette_k5.png
+
++ hipparcos.kmeans_metrics_k6.csv
++ hipparcos.kmeans_scatter_k6.png
++ hipparcos.kmeans_silhouette_k6.png
+
+Con K = 6 se obtiene en el cluster 4 se obtiene el mejor silhouette con la mejor 
+densidad de hyades. Por ende se fija el K en 6 para KMeans sobre hipparcos y se genera
+la lista de candidatos a hyades a partir de hipparcos.kmeans_k6.csv,  esto se hace a 
+mano con el excel ordenando por cluster y is_hyades.
+
++ hipparcos.kmeans.candidates.csv
+
+Esta ultima lista se le resta al catalogo de tycho :
+
+python remove_from_tycho.py -t ../data/tycho.tag.csv -y ../data/hipparcos.kmeans.candidates.csv -o ../data/tycho.no.hipparcos.candidates.csv
+
+generando :
+
++ tycho.no.hipparcos.candidates.csv
+
+Ahora .... KMeans sobre tycho con k = 4, 5 y 6
+
+python cluster_kmeans.py -f../data/tycho.no.hipparcos.candidates.csv -p ../data/graphs/tycho.kmeans_scatter_k<i>.png -k <i> -j 6 -r 85562 -i random -c RA_J2000_24 DE_J2000 pmRA pmDE BT VT V B-V -o run/tycho.kmeans_k<i>.csv -s ../data/graphs/tycho.kmeans_silhouette_k<i>.png -m ../data/tycho.kmeans_metrics_k<i>.csv
+
+En base a :
+
++ tycho.kmeans_metrics_k4.csv
++ tycho.kmeans_scatter_k4.png
++ tycho.kmeans_silhouette_k4.png
+ 
++ tycho.kmeans_metrics_k5.csv
++ tycho.kmeans_scatter_k5.png
++ tycho.kmeans_silhouette_k5.png
+
++ tycho.kmeans_metrics_k6.csv
++ tycho.kmeans_scatter_k6.png
++ tycho.kmeans_silhouette_k6.png
+
+Con K = 5 se obtiene en el cluster 3 se obtiene el mejor silhouette con la mejor 
+densidad de hyades. Por ende se fija el K en 5 para KMeans sobre Tycho y se genera
+la lista de candidatos a hyades a partir de tycho.kmeans_k5.csv,  esto se hace a 
+mano con el excel ordenando por cluster y is_hyades.
+
++ tycho.kmeans.candidates.csv
+
