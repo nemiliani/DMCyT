@@ -1,3 +1,30 @@
+Match de las estrellas de symbad contra hipparcos
+-------------------------------------------------
+
+python match_stars.py
+
+Esto genera el graphico :
+
++ distance_dstribution.png
+
+Se pone el corte en el 88% y para eso se ejecuta :
+
+python get_sublist.py -f symbad_augmented.csv -p 88 -o data/symbad_88.percent.csv
+
+Este ultimo archivo pasa a ser las estrellas que aceptamos como Hyades. Con
+esta lista marcamos en los catalogos de tycho e hipparchos las que son
+hyades usando el campo 'is_hyades' 
+
+python mark_hyades.py -i ../data/hipparcos.no.nan.csv -s ../data/symbad_88.percent.csv -o ../data/hipparcos.tag.csv
+python mark_hyades.py -i ../data/tycho.csv -s ../data/symbad_88.percent.csv -o ../data/tycho.tag.csv
+
+De ahora en mas los archivos que se usan para los algoritos de clustering son
+
++ hipparcos.tag.csv
++ tycho.tag.csv
+
+
+
 Pasos para aproximar el K inicial
 ---------------------------------
 
@@ -157,3 +184,23 @@ la lista de candidatos a hyades a partir de tycho.pam_k9.csv,  esto se hace a
 mano con el excel ordenando por cluster e is_hyades
 
 + tycho.pam.candidates.csv
+
+
+ACLARACION : en hipparcos se utilizaron los campos :
+
++ RA_J2000 
++ DE_J2000 
++ Plx 
++ pmRA 
++ pmDE 
++ Vmag 
++ B-V
+
+ACLARACION : en tycho se utilizaron los campos :
+
++ RA_J2000_24
++ DE_J2000
++ pmRA 
++ pmDE 
++ Vmag 
++ B-V
