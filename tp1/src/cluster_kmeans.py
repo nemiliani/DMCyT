@@ -1,6 +1,6 @@
 import pandas
 import argparse
-import pylab as plt
+import matplotlib.pyplot as plt
 import numpy as np
 
 import sklearn.cluster as skc
@@ -123,6 +123,7 @@ if __name__ == '__main__':
     plt.xticks(())
     plt.yticks(())
     plt.savefig(args.scatter_file)
+    plt.close()
 
     if args.sil_vs_cluster :
         plt.figure(2)
@@ -141,5 +142,4 @@ if __name__ == '__main__':
         plt.ylabel("Total Sihlouette score")
         plt.xlabel("Number of clusters clusters")
         plt.savefig(args.sil_vs_cluster)
-    plt.close()        
-        
+        plt.close()

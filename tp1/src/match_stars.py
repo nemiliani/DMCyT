@@ -122,9 +122,10 @@ if __name__=='__main__':
     symbad_augmented = pandas.DataFrame(data=sg.symbad)
     symbad_augmented['dist'] = symbad_dists
     symbad_augmented['cercanaHip'] = symbad_closest['HIP']
-    sym_no_dups = symbad_augmented.sort(columns='dist', axis=0).drop_duplicates(subset='cercanaHip')
+    sym_no_dups = symbad_augmented.sort(columns='dist', axis=0).drop_duplicates(cols='cercanaHip')
     sym_no_dups.to_csv('symbad_augmented.csv')
 
     plt.figure()
     plt.hist(list(sym_no_dups['dist']), normed=0, histtype='bar', rwidth=0.8)
     plt.savefig('distance_dstribution.png')
+    plt.close()
