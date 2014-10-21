@@ -24,8 +24,8 @@ obtener el mayor silohuette para el cluster que mas Hyades contiene. Es preferib
 tener un menor valor de silhouette general y un mayor valor silhouette para el
 cluster que mas Hyades contiene.
 
-Probando Kmeans sobre Hipparcos y Tycho
----------------------------------------
+Kmeans sobre Hipparcos y Tycho
+------------------------------
 
 KMeans sobre hipparcos con k = 4, 5 y 6
 
@@ -85,3 +85,75 @@ mano con el excel ordenando por cluster y is_hyades.
 
 + tycho.kmeans.candidates.csv
 
+PAM sobre Hipparcos y Tycho
+---------------------------
+
+PAM sobre hipparcos con k = 4, 5 y 6
+
+python cluster_pam.py -f ../data/hipparcos.tag.csv -p ../data/graphs/hipparcos.pam_scatter_k<i>.png -k <i> -c RA_J2000 DE_J2000 Plx pmRA pmDE Vmag B-V -o run/hipparcos.pam_k<i>.csv -s ../data/graphs/hipparcos.pam_silhouette_k<i>.png -m ../data/hipparcos.pam_metrics_k<i>.csv
+
+En base a :
+
++ hipparcos.pam_metrics_k4.csv
++ hipparcos.pam_scatter_k4.png
++ hipparcos.pam_silhouette_k4.png
+ 
++ hipparcos.pam_metrics_k5.csv
++ hipparcos.pam_scatter_k5.png
++ hipparcos.pam_silhouette_k5.png
+
++ hipparcos.pam_metrics_k6.csv
++ hipparcos.pam_scatter_k6.png
++ hipparcos.pam_silhouette_k6.png
+
+Con K = 4 se obtiene en el cluster 2 se obtiene el mejor silhouette con la mejor 
+densidad de hyades. Por ende se fija el K en 4 para PAM sobre hipparcos y se genera
+la lista de candidatos a hyades a partir de hipparcos.pam_k4.csv,  esto se hace a 
+mano con el excel ordenando por cluster y is_hyades.
+
++ hipparcos.pam.candidates.csv
+
+Esta ultima lista se le resta al catalogo de tycho :
+
+python remove_from_tycho.py -t ../data/tycho.tag.csv -y ../data/hipparcos.pam.candidates.csv -o ../data/tycho.no.hipparcos.candidates.pam.csv
+
+generando :
+
++ tycho.no.hipparcos.candidates.pam.csv
+
+Ahora .... PAM sobre tycho con k = 4, 5 y 6
+
+python cluster_pam.py -f../data/tycho.no.hipparcos.candidates.pam.csv -p ../data/graphs/tycho.pam_scatter_k<i>.png -k <i> c RA_J2000_24 DE_J2000 pmRA pmDE BT VT V B-V -o run/tycho.pam_k<i>.csv -s ../data/graphs/tycho.pam_silhouette_k<i>.png -m ../data/tycho.pam_metrics_k<i>.csv
+
+En base a :
+
++ tycho.pam_metrics_k4.csv
++ tycho.pam_scatter_k4.png
++ tycho.pam_silhouette_k4.png
+ 
++ tycho.pam_metrics_k5.csv
++ tycho.pam_scatter_k5.png
++ tycho.pam_silhouette_k5.png
+
++ tycho.pam_metrics_k6.csv
++ tycho.pam_scatter_k6.png
++ tycho.pam_silhouette_k6.png
+
+Los valores de silhouette que presentan estos K son bajos como asi la densidades hyades.
+Por ende comence a aumentar el K y vi que la densidad del grupo que contiene mas hyades
+comenzo a aumentar hasta k = 9 y se estabilizo en K = 10 y K = 11. Por otro parte el
+silhouette del grupo con mas densidad de hyades aumento hasta k = 9 y disminuyo para
+K = 10 y K = 11. Esto puede verse en :
+
++ tycho.pam_metrics_k7.csv
++ tycho.pam_metrics_k8.csv
++ tycho.pam_metrics_k9.csv
++ tycho.pam_metrics_k10.csv
++ tycho.pam_metrics_k11.csv
+
+Con K = 9 se obtiene en el cluster 1 se obtiene el mejor silhouette con la mejor 
+densidad de hyades. Por ende se fija el K en 9 para PAM sobre tycho y se genera
+la lista de candidatos a hyades a partir de tycho.pam_k9.csv,  esto se hace a 
+mano con el excel ordenando por cluster e is_hyades
+
++ tycho.pam.candidates.csv

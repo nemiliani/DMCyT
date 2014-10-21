@@ -7,5 +7,4 @@ cache/
 .~lock.*
 *.pickle
 graphs.bak/
-graphs/
 settings.py
