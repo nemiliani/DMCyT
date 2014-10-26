@@ -5,6 +5,7 @@ import numpy as np
 
 import sklearn.cluster as skc
 from sklearn import metrics
+from sklearn.preprocessing import scale
 from sklearn.decomposition import PCA
 
 from time import time
@@ -43,7 +44,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     df = pandas.read_csv(args.data_file, header=0)
-    data = df.as_matrix(columns=args.columns)
+    non_scaled_data = df.as_matrix(columns=args.columns)
+    data = scale(non_scaled_data)
     km = skc.KMeans(n_clusters=args.n_clusters, 
                init=args.init,
                n_jobs=args.n_jobs,
