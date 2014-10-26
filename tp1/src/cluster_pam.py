@@ -6,6 +6,7 @@ import sys
 
 import Pycluster
 from sklearn import metrics
+from sklearn.preprocessing import scale
 from sklearn.decomposition import PCA
 
 from time import time
@@ -28,8 +29,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     df = pandas.read_csv(args.data_file, header=0)
-    data = df.as_matrix(columns=args.columns)
-    
+    non_scaled_data = df.as_matrix(columns=args.columns)
+    data = scale(non_scaled_data)
     t0 = time()
     labels, error, nfound = Pycluster.kcluster(
                                 data, 
