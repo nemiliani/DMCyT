@@ -1,6 +1,7 @@
 *.pyc
 venv/
 venv2/
+run/
 cache/
 .RData
 .Rhistory
